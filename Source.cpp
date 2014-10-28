@@ -3,14 +3,15 @@
 #include<bitset>
 using namespace std;
 ofstream output;
-string out = "out.txt";//ok
+string out = "out.txt";
 
 struct reg{
-	long int data=0;
+	long int num = 0;
 	string secname;
 };
 reg regs[32];
-void fillrigsec()
+char memory[8 * 1024];
+void fillregsec()
 {
 	regs[0].secname = "$zero";
 	regs[1].secname = "$at";
@@ -48,19 +49,20 @@ void fillrigsec()
 }
 
 
-void decode(unsigned int instruction)
+void decode(unsigned int instWord)
 {
 	unsigned int rd, rs, rt, func, shamt, imm, opcode;
 	unsigned int address;
-	opcode=instruction >> 26;
+	opcode = instWord >> 26;
 	if (opcode == 0)
 	{
 		//R-type
-		func = instruction & 0x0000003F;
-		shamt = instruction & 0x000007c0;
-		rd = instruction & 0x0000f800;
-		rt = instruction & 0x001f0000;
-		rs = instruction & 0x03e00000;
+		func = instWord & 0x3F;
+		shamt = (instWord >> 6) & 0x1f;
+		rd = (instWord >> 11) & 0x1f;
+		rt = (instWord >> 16) & 0x1f;
+		rs = (instWord >> 21) & 0x1f;
+
 	}
 	else if (opcode == 2 || opcode == 3)
 	{
@@ -69,27 +71,53 @@ void decode(unsigned int instruction)
 	else
 	{
 		//I-type
-		rt = instruction & 0x001f0000;
-		rs = instruction & 0x03e00000;
-		imm = instruction & 0x0000ffff;
+
+		rt = (instWord >> 16) & 0x1f;
+		rs = (instWord >> 21) & 0x1f;
+		imm = (instWord & 0x0000FFFF);
+
+
+		if (opcode == 8)
+		{
+			regs[rt].num = regs[rs].num + imm;
+			output << "addi " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+		}
+		else if (opcode == 9)
+		{
+			regs[rt].num = regs[rs].num + imm;
+			output << "addiu " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+		}
+		else if (opcode == 12)
+		{
+			regs[rt].num = regs[rs].num & imm;
+			output << "andi " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+		}
+		else if (opcode == 13)
+		{
+			regs[rt].num = regs[rs].num | imm;
+			output << "ori " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+		}
+
+
 	}
 }
 
 void main()
 {
 	ifstream infile;
-	string in="sss.bin";
+	string in = "sss.bin";
 	output.open(out.c_str());
 	unsigned int instruction;
+	fillregsec();
 	infile.open(in.c_str(), ios::out | ios::binary);
 	if (infile.is_open())
-	{		
+	{
 		while (infile.read((char*)&instruction, 4))
 		{
 			decode(instruction);
 		}
 	}
-	
+
 	infile.close();
 	output.close();
 	cout << endl;
