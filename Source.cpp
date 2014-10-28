@@ -3,7 +3,7 @@
 #include<bitset>
 using namespace std;
 ofstream output;
-string out = "out.txt";
+string out = "out.txt";//ok
 
 struct reg{
 	long int data=0;
