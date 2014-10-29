@@ -53,6 +53,7 @@ void decode(unsigned int instWord)
 {
 	unsigned int rd, rs, rt, func, shamt, imm, opcode;
 	unsigned int address;
+	static unsigned int pc = 0x00400000;
 	opcode = instWord >> 26;
 	if (opcode == 0)
 	{
@@ -97,8 +98,36 @@ void decode(unsigned int instWord)
 			regs[rt].num = regs[rs].num | imm;
 			output << "ori " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
 		}
+		else if (opcode == 4)
+		{
+			if (regs[rt].num == regs[rs].num)
+				pc += imm * 4;
+			output << "beq" << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+		}
+		else if (opcode == 5)
+		{
+			if (regs[rt].num != regs[rs].num)
+				pc += imm * 4;
+			output << "bne" << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+		}
+		else if (opcode == 10)
+		{
+			if (regs[rs].num < imm)
+				regs[rt].num = 1;
+			else
+				regs[rt].num = 0;
+			output << "slt" << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+		}
+		else if (opcode == 15)
+		{
+			imm << 16;
+			regs[rt].num = regs[rt].num & 0x0000FFFF;
+			regs[rt].num = regs[rt].num | imm;
+			output << "lui" << regs[rt].secname << "," << imm << endl;
+		}
 
 
+		pc += 4;
 	}
 }
 
