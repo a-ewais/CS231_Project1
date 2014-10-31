@@ -272,7 +272,6 @@ void debug(unsigned int instWord)
     }
 	else if (opcode == 2 || opcode == 3)
 	{
-    cout<<"J! " <<opcode<<endl;
 		//j type
 		address = instWord & 0x03ffffff;
 		address = address << 2;
@@ -283,7 +282,6 @@ void debug(unsigned int instWord)
 	}
 	else
 	{
-    cout<<"I! " <<opcode<<endl;
 		//I-type
 
 		rt = (instWord >> 16) & 0x1f;
