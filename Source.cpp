@@ -134,64 +134,64 @@ void decode(unsigned int instWord)
 
 		if (opcode == 8)
 		{
-			output << "0x" << hex << pc << " addi " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+			output << "0x" << hex << pc << " addi " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 9)
 		{
-			output << "0x" << hex << pc << " addiu " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+			output << "0x" << hex << pc << " addiu " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 12)
 		{
-			output << "0x" << hex << pc << " andi " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+			output << "0x" << hex << pc << " andi " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 13)
 		{
-			output << "0x" << hex << pc << " ori " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+			output << "0x" << hex << pc << " ori " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 14)
 		{
-			output << "0x" << hex << pc << " xori " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+			output << "0x" << hex << pc << " xori " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 4)
 		{
-			output << "0x" << hex << pc << " beq " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+			output << "0x" << hex << pc << " beq " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 5)
 		{
-			output << "0x" << hex << pc << " bne " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+			output << "0x" << hex << pc << " bne " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 10)
 		{
-			output << "0x" << hex << pc << " slti " << regs[rt].secname << "," << regs[rs].secname << "," << imm << endl;
+			output << "0x" << hex << pc << " slti " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 15)
 		{
-			output << "0x" << hex << pc << " lui " << regs[rt].secname << "," << imm << endl;
+			output << "0x" << hex << pc << " lui " << regs[rt].secname << "," << "0x" << imm << endl;
 		}
 		else if (opcode == 43)
 		{
-			output << "0x" << hex << pc << " sw " << regs[rt].secname << "," << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << " sw " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 
 		else if (opcode == 35)
 		{
-			output << "0x" << hex << pc << " lw " << regs[rt].secname << "," << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << " lw " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 32)
 		{
-			output << "0x" << hex << pc << " lb " << regs[rt].secname << "," << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << " lb " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 40)
 		{
-			output << "0x" << hex << pc << " sb " << regs[rt].secname << "," << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << " sb " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 41)
 		{
-			output << "0x" << hex << pc << " sh " << regs[rt].secname << "," << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << " sh " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 33)
 		{
-			output << "0x" << hex << pc << " lh " << regs[rt].secname << "," << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << " lh " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 
 	}
@@ -208,6 +208,7 @@ void debug(unsigned int instWord)
 {
 	unsigned int rd, rs, rt, func, shamt, imm, opcode;
 	unsigned int address;
+	int eximm;
 	static unsigned int pc = 0x00400000;
 	opcode = instWord >> 26;
 	if (opcode == 0)
@@ -255,15 +256,11 @@ void debug(unsigned int instWord)
 			regs[rt].num = regs[rs].num + imm;
 		}
 		else if (opcode == 12)
-		{//andi
-			if (imm & 0x8000)
-				imm = imm & 0xffff0000;
+		{//andi			
 			regs[rt].num = regs[rs].num & imm;
 		}
 		else if (opcode == 13)
-		{//ori
-			if (imm & 0x8000)
-				imm = imm & 0xffff0000;
+		{//ori			
 			regs[rt].num = regs[rs].num | imm;
 		}
 		else if (opcode == 14)
@@ -293,40 +290,43 @@ void debug(unsigned int instWord)
 		}
 		else if (opcode == 15)
 		{//lui
-			if (imm & 0x8000)
-				imm = imm & 0xffff0000;
-			imm << 16;
-			regs[rt].num = regs[rt].num & 0x0000FFFF;
+
+			imm = imm << 16;
 			regs[rt].num = regs[rt].num | imm;
 
 		}
 		else if (opcode == 43)
 		{//sw
-			if (imm & 0x8000)
-				imm = imm & 0xffff0000;
-			address = regs[rs].num + imm * 4;
-			memory[address++ - 0x10010000] = regs[rt].num & 0x000000ff;
-			memory[address++ - 0x10010000] = (regs[rt].num & 0x0000ff00) >> 8;
-			memory[address++ - 0x10010000] = (regs[rt].num & 0x00ff0000) >> 16;
-			memory[address++ - 0x10010000] = (regs[rt].num & 0xff000000) >> 24;
+
+			imm = (imm & 0x8000) ? (0xFFFF0000 | imm) : imm;
+			imm *= 4;
+			eximm = regs[rs].num + imm - 0x10010000;
+
+			memory[eximm++] = regs[rt].num & 0x000000ff;
+			memory[eximm++] = (regs[rt].num & 0x0000ff00) >> 8;
+			memory[eximm++] = (regs[rt].num & 0x00ff0000) >> 16;
+			memory[eximm] = (regs[rt].num & 0xff000000) >> 24;
 		}
 
 		else if (opcode == 35)
 		{//lw
+
+			address = regs[rs].num + imm * 4;
 			if (imm & 0x8000)
 				imm = imm & 0xffff0000;
-			address = regs[rs].num + imm * 4;
 			regs[rt].num = 0;
-			regs[rt].num |= (memory[address-- - 0x10010000] << 24);
-			regs[rt].num |= (memory[address-- - 0x10010000] << 16);
-			regs[rt].num |= (memory[address-- - 0x10010000] << 8);
-			regs[rt].num |= memory[address - 0x10010000];
+			regs[rt].num |= memory[address++ - 0x10010000];
+			regs[rt].num |= (memory[address++ - 0x10010000] << 8);
+			regs[rt].num |= (memory[address++ - 0x10010000] << 16);
+			regs[rt].num |= (memory[address - 0x10010000] << 24);
+
+
 
 		}
 		else if (opcode == 32)
 		{//lb
 			if (imm & 0x8000)
-				imm = imm & 0xffff0000;
+				imm = imm | 0xffff0000;
 			address = regs[rs].num + imm;
 			regs[rt].num = memory[address - 0x10010000];
 
@@ -336,27 +336,29 @@ void debug(unsigned int instWord)
 			if (imm & 0x8000)
 				imm = imm & 0xffff0000;
 			address = regs[rs].num + imm;
-			memory[address++ - 0x10010000] = regs[rt].num & 0x000000ff;
+			memory[address - 0x10010000] = regs[rt].num & 0x000000ff;
 
 		}
 		else if (opcode == 41)
 		{//sh
-			if (imm & 0x8000)
-			  imm = imm & 0xffff0000;
+
 			address = regs[rs].num + imm * 2;
+			if (imm & 0x8000)
+				imm = imm & 0xffff0000;
 			memory[address++ - 0x10010000] = regs[rt].num & 0x000000ff;
-			memory[address++ - 0x10010000] = (regs[rt].num & 0x0000ff00) >> 8;
+			memory[address - 0x10010000] = (regs[rt].num & 0x0000ff00) >> 8;
 
 		}
-		else if (opcode == 33)    //lh
-		{
-			if (imm & 0x8000)
-			  imm = imm & 0xffff0000;
+		else if (opcode == 33)
+		{//lh
 
-			address = regs[rs].num + imm * 4;
+			address = regs[rs].num + imm * 2;
+			if (imm & 0x8000)
+				imm = imm & 0xffff0000;
 			regs[rt].num = 0;
-			regs[rt].num |= (memory[address-- - 0x10010000] << 8);
-			regs[rt].num |= memory[address - 0x10010000];
+			regs[rt].num |= memory[address++ - 0x10010000];
+			regs[rt].num |= (memory[address - 0x10010000] << 8);
+
 		}
 	}
 	pc += 4;
