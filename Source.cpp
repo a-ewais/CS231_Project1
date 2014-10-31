@@ -8,11 +8,11 @@ string out = "out.txt";
 int j;
 
 struct reg{
-	long int num = 0;   //Can't initialize to 0
+	long int num;   //Can't initialize to 0
 	string secname;
 };
 
-reg regs[32];
+reg regs[32] = {0};   //initialize all members of the struct to 0, works without this?
 char memory[8 * 1024];
 void fillregsec()
 {
@@ -59,7 +59,7 @@ void decode(unsigned int instWord)
 	unsigned int address;
 	static unsigned int pc = 0x00400000;
 	opcode = instWord >> 26;
-  cout<<opcode<<endl;
+  //cout<<opcode<<endl;
 	if (opcode == 0)
 	{
 		//R-type
@@ -221,6 +221,36 @@ void debug(unsigned int instWord)
 		rs = (instWord >> 21) & 0x1f;
     switch(func)
     {
+    case 0x20:  //add
+      regs[rd].num = regs[rs].num + regs[rt].num;
+      break;
+    case 0x21:  //addu
+      regs[rd].num = regs[rs].num + regs[rt].num;
+      break;
+    case 0x22:  //sub
+      regs[rd].num = regs[rs].num - regs[rt].num;
+      break;
+    case 0x24:  //and
+      regs[rd].num = regs[rs].num & regs[rt].num;
+      break;
+    case 0x25:  //or
+      regs[rd].num = regs[rs].num | regs[rt].num;
+      break;
+    case 0x26: //xor
+      regs[rd].num = regs[rs].num ^ regs[rt].num;
+      break;
+    case 0x2a: //slt
+      regs[rd].num = (regs[rs].num < regs[rt].num);
+      break;
+    case 0x08: //jr
+      pc = regs[rs].num;
+      break;
+    case 0x02: //srl
+      regs[rd].num = regs[rs].num >> regs[rt].num;
+      break;
+    case 0x00: //sll
+      regs[rd].num = regs[rs].num << regs[rt].num;
+      break;
     case 12:  //syscall
       switch(regs[2].num)
       {
@@ -239,11 +269,10 @@ void debug(unsigned int instWord)
       }
       break;
     }
-
-
 	}
 	else if (opcode == 2 || opcode == 3)
 	{
+    cout<<"J! " <<opcode<<endl;
 		//j type
 		address = instWord & 0x03ffffff;
 		address = address << 2;
@@ -256,6 +285,7 @@ void debug(unsigned int instWord)
 	}
 	else
 	{
+    cout<<"I! " <<opcode<<endl;
 		//I-type
 
 		rt = (instWord >> 16) & 0x1f;
@@ -388,8 +418,7 @@ void main()
 {
   unsigned int instruction[1024];
 	ifstream infile;
-	string in = "testr";
-
+	string in = "evenodd";
 	fillregsec();   //Initialize secondary names
 
 	infile.open(in.c_str(), ios::out | ios::binary);
@@ -405,10 +434,10 @@ void main()
 			decode(instruction[i++]);
 		}
 		output.close();
-		//for (j = 0; j < i; j++)
-		//{
-		//	debug(instruction[j]);
-		//}
+		for (j = 0; j < i; j++)
+		{
+			debug(instruction[j]);
+		}
 	}
 	infile.close();
 	cout << endl;
