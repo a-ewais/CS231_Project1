@@ -153,11 +153,11 @@ void decode(unsigned int instWord)
 		}
 		else if (opcode == 4)
 		{
-			output << "0x" << hex << pc << "\tbeq\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\tbeq\t" << regs[rs].secname << "," << regs[rt].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 5)
 		{
-			output << "0x" << hex << pc << "\tbne\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\tbne\t" << regs[rs].secname << "," << regs[rt].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 10)
 		{
@@ -278,12 +278,11 @@ void debug(unsigned int instWord)
 		address = address | (pc & 0xf0000000);
 		if (opcode == 3)
 			regs[31].num = pc + 4;
-		pc = address;
+		pc = address - 4;
 	}
 	else
 	{
 		//I-type
-
 		rt = (instWord >> 16) & 0x1f;
 		rs = (instWord >> 21) & 0x1f;
 		imm = (instWord & 0x0000FFFF);
