@@ -255,16 +255,16 @@ void debug(unsigned int instWord)
       switch(regs[2].num)
       {
       case 1:
-        cout<<regs[4].num <<endl;
+        cout << regs[4].num <<endl;
         break;
       case 5:
-        cin>>regs[12].num;
+        cin >> regs[12].num;
         break;
       case 11:
-        cout<<char(regs[4].num) <<endl;
+        cout <<char(regs[4].num) <<endl;
         break;
       case 12:
-        cin>>regs[4].num;
+        cin >> regs[4].num;
         break;
       }
       break;
