@@ -5,7 +5,7 @@ using namespace std;
 
 ofstream output;
 string out = "out.txt";
-int j;
+int j = 0;
 
 struct reg{
 	long int num = 0;   //Can't initialize to 0
@@ -59,7 +59,6 @@ void decode(unsigned int instWord)
 	unsigned int address;
 	static unsigned int pc = 0x00400000;
 	opcode = instWord >> 26;
-  cout<<opcode<<endl;
 	if (opcode == 0)
 	{
 		//R-type
@@ -69,42 +68,42 @@ void decode(unsigned int instWord)
 		rt = (instWord >> 16) & 0x1f;
 		rs = (instWord >> 21) & 0x1f;
 
-    switch(func)
-    {
-    case 0x20:  //add
-      output << "0x" <<hex <<pc <<"\tadd " <<regs[rd].secname <<", " <<regs[rs].secname <<", " <<regs[rt].secname <<endl;
-      break;
-    case 0x21:  //addu
-      output << "0x" <<hex <<pc <<"\taddu " <<regs[rd].secname <<", " <<regs[rs].secname <<", " <<regs[rt].secname <<endl;
-      break;
-    case 0x22:  //sub
-      output << "0x" <<hex <<pc <<"\tsub " <<regs[rd].secname <<", " <<regs[rs].secname <<", " <<regs[rt].secname <<endl;
-      break;
-    case 0x24:  //and
-      output << "0x" <<hex <<pc <<"\tand " <<regs[rd].secname <<", " <<regs[rs].secname <<", " <<regs[rt].secname <<endl;
-      break;
-    case 0x25:  //or
-      output << "0x" <<hex <<pc <<"\tor " <<regs[rd].secname <<", " <<regs[rs].secname <<", " <<regs[rt].secname <<endl;
-      break;
-    case 0x26: //xor
-      output << "0x" <<hex <<pc <<"\txor " <<regs[rd].secname <<", " <<regs[rs].secname <<", " <<regs[rt].secname <<endl;
-      break;
-    case 0x2a: //stt
-      output << "0x" <<hex <<pc <<"\tslt " <<regs[rd].secname <<", " <<regs[rs].secname <<", " <<regs[rt].secname <<endl;
-      break;
-    case 0x08: //jr
-      output << "0x" <<hex <<pc <<"\tjr " <<regs[rs].secname <<endl;
-      break;
-    case 0x02: //srl
-      output << "0x" <<hex <<pc <<"\tsrl " <<regs[rd].secname <<", " <<regs[rt].secname <<", " <<shamt <<endl;
-      break;
-    case 0x00: //sll
-      output << "0x" <<hex <<pc <<"\tsll " <<regs[rd].secname <<", " <<regs[rt].secname <<", " <<shamt <<endl;
-      break;
-    case 12: //syscall
-      output << "0x" <<hex <<pc <<"\tsyscall" <<endl;
-      break;
-    }
+		switch (func)
+		{
+		case 0x20:  //add
+			output << "0x" << hex << pc << "\tadd\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
+			break;
+		case 0x21:  //addu
+			output << "0x" << hex << pc << "\taddu\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
+			break;
+		case 0x22:  //sub
+			output << "0x" << hex << pc << "\tsub\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
+			break;
+		case 0x24:  //and
+			output << "0x" << hex << pc << "\tand\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
+			break;
+		case 0x25:  //or
+			output << "0x" << hex << pc << "\tor\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
+			break;
+		case 0x26: //xor
+			output << "0x" << hex << pc << "\txor\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
+			break;
+		case 0x2a: //stt
+			output << "0x" << hex << pc << "\tslt\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
+			break;
+		case 0x08: //jr
+			output << "0x" << hex << pc << "\tjr\t" << regs[rs].secname << endl;
+			break;
+		case 0x02: //srl
+			output << "0x" << hex << pc << "\tsrl\t" << regs[rd].secname << ", " << regs[rt].secname << ", " << shamt << endl;
+			break;
+		case 0x00: //sll
+			output << "0x" << hex << pc << "\tsll\t" << regs[rd].secname << ", " << regs[rt].secname << ", " << shamt << endl;
+			break;
+		case 12: //syscall
+			output << "0x" << hex << pc << "\tsyscall" << endl;
+			break;
+		}
 
 	}
 	else if (opcode == 2 || opcode == 3)
@@ -115,12 +114,12 @@ void decode(unsigned int instWord)
 		address = address | (pc & 0xf0000000);
 		if (opcode == 3)
 		{
-			output << "0x" << hex << pc << " jal " << "0x" << hex << address << endl;
+			output << "0x" << hex << pc << "\tjal\t" << "0x" << hex << address << endl;
 		}
 		else if (opcode == 2)
 		{
 
-			output << "0x" << hex << pc << " j " << "0x" << hex << address << endl;
+			output << "0x" << hex << pc << "\tj\t" << "0x" << hex << address << endl;
 		}
 	}
 	else if (0 != opcode && 2 != opcode && 3 != opcode && 16 != opcode && 17 != opcode && 18 != opcode && 19 != opcode)
@@ -134,64 +133,64 @@ void decode(unsigned int instWord)
 
 		if (opcode == 8)
 		{
-			output << "0x" << hex << pc << " addi " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\taddi\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 9)
 		{
-			output << "0x" << hex << pc << " addiu " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\taddiu\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 12)
 		{
-			output << "0x" << hex << pc << " andi " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\tandi\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 13)
 		{
-			output << "0x" << hex << pc << " ori " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\tori\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 14)
 		{
-			output << "0x" << hex << pc << " xori " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\txori\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 4)
 		{
-			output << "0x" << hex << pc << " beq " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\tbeq\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 5)
 		{
-			output << "0x" << hex << pc << " bne " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\tbne\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 10)
 		{
-			output << "0x" << hex << pc << " slti " << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\tslti\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
 		}
 		else if (opcode == 15)
 		{
-			output << "0x" << hex << pc << " lui " << regs[rt].secname << "," << "0x" << imm << endl;
+			output << "0x" << hex << pc << "\tlui\t" << regs[rt].secname << "," << "0x" << imm << endl;
 		}
 		else if (opcode == 43)
 		{
-			output << "0x" << hex << pc << " sw " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tsw\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 
 		else if (opcode == 35)
 		{
-			output << "0x" << hex << pc << " lw " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tlw\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 32)
 		{
-			output << "0x" << hex << pc << " lb " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tlb\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 40)
 		{
-			output << "0x" << hex << pc << " sb " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tsb\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 41)
 		{
-			output << "0x" << hex << pc << " sh " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tsh\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 33)
 		{
-			output << "0x" << hex << pc << " lh " << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tlh\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
 		}
 
 	}
@@ -219,28 +218,26 @@ void debug(unsigned int instWord)
 		rd = (instWord >> 11) & 0x1f;
 		rt = (instWord >> 16) & 0x1f;
 		rs = (instWord >> 21) & 0x1f;
-    switch(func)
-    {
-    case 12:  //syscall
-      switch(regs[2].num)
-      {
-      case 1:
-        cout<<regs[4].num <<endl;
-        break;
-      case 5:
-        cin>>regs[12].num;
-        break;
-      case 11:
-        cout<<char(regs[4].num) <<endl;
-        break;
-      case 12:
-        cin>>regs[4].num;
-        break;
-      }
-      break;
-    }
-
-
+		switch (func)
+		{
+		case 12:  //syscall
+			switch (regs[2].num)
+			{
+			case 1:
+				cout << regs[4].num << endl;
+				break;
+			case 5:
+				cin >> regs[12].num;
+				break;
+			case 11:
+				cout << char(regs[4].num) << endl;
+				break;
+			case 12:
+				cin >> regs[4].num;
+				break;
+			}
+			break;
+		}
 	}
 	else if (opcode == 2 || opcode == 3)
 	{
@@ -248,11 +245,9 @@ void debug(unsigned int instWord)
 		address = instWord & 0x03ffffff;
 		address = address << 2;
 		address = address | (pc & 0xf0000000);
-		j = (pc - 0x00400000) / 4;
 		if (opcode == 3)
 			regs[31].num = pc + 4;
 		pc = address;
-		j = (pc - 0x00400000) / 4;
 	}
 	else
 	{
@@ -275,6 +270,7 @@ void debug(unsigned int instWord)
 			if (imm & 0x8000)
 				imm = imm & 0xffff0000;
 			regs[rt].num = regs[rs].num + imm;
+
 		}
 		else if (opcode == 12)
 		{//andi			
@@ -382,13 +378,15 @@ void debug(unsigned int instWord)
 
 		}
 	}
+
 	pc += 4;
+	j = (pc - 0x00400000) / 4;
 }
 void main()
 {
-  unsigned int instruction[1024];
+	unsigned int instruction[1024];
 	ifstream infile;
-	string in = "testr";
+	string in = "sss.bin";
 
 	fillregsec();   //Initialize secondary names
 
@@ -401,15 +399,15 @@ void main()
 
 		while (infile.read((char*)&instruction[i], 4))
 		{
-      //cout<<instruction[i];
 			decode(instruction[i++]);
 		}
 		output.close();
-		//for (j = 0; j < i; j++)
-		//{
-		//	debug(instruction[j]);
-		//}
+		for (; j < i;)
+		{
+			debug(instruction[j]);
+		}
 	}
+
 	infile.close();
 	cout << endl;
 	system("pause");
