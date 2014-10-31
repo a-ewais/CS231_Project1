@@ -8,7 +8,7 @@ string out = "out.txt";
 int j;
 
 struct reg{
-	int num;   //Can't initialize to 0
+	long int num = 0;   //Can't initialize to 0
 	string secname;
 };
 
@@ -219,6 +219,27 @@ void debug(unsigned int instWord)
 		rd = (instWord >> 11) & 0x1f;
 		rt = (instWord >> 16) & 0x1f;
 		rs = (instWord >> 21) & 0x1f;
+    switch(func)
+    {
+    case 12:  //syscall
+      switch(regs[2].num)
+      {
+      case 1:
+        cout<<regs[4].num <<endl;
+        break;
+      case 5:
+        cin>>regs[12].num;
+        break;
+      case 11:
+        cout<<char(regs[4].num) <<endl;
+        break;
+      case 12:
+        cin>>regs[4].num;
+        break;
+      }
+      break;
+    }
+
 
 	}
 	else if (opcode == 2 || opcode == 3)
