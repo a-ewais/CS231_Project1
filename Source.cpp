@@ -116,8 +116,9 @@ void fillregsec()
 void decode(unsigned int instWord)
 {
 
-	unsigned int rd, rs, rt, func, shamt, imm, opcode;
+	unsigned int rd, rs, rt, func, imm, shamt, opcode;
 	unsigned int address;
+  int imm_signed;
 	static unsigned int pc = 0x00400000;
 
 	opcode = instWord >> 26;
@@ -140,7 +141,10 @@ void decode(unsigned int instWord)
 			output << "0x" << hex << pc << "\tadd\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
 			break;
 		case 0x21:  //addu
-			output << "0x" << hex << pc << "\taddu\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
+      if(rs == 0)
+			  output << "0x" << hex << pc << "\tmove\t" << regs[rd].secname << ", " << regs[rt].secname << endl;
+      else
+        output << "0x" << hex << pc << "\taddu\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
 			break;
 		case 0x22:  //sub
 			output << "0x" << hex << pc << "\tsub\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
@@ -154,7 +158,7 @@ void decode(unsigned int instWord)
 		case 0x26: //xor
 			output << "0x" << hex << pc << "\txor\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
 			break;
-		case 0x2a: //stt
+		case 0x2a: //slt
 			output << "0x" << hex << pc << "\tslt\t" << regs[rd].secname << ", " << regs[rs].secname << ", " << regs[rt].secname << endl;
 			break;
 		case 0x08: //jr
@@ -195,15 +199,15 @@ void decode(unsigned int instWord)
 		rt = (instWord >> 16) & 0x1f;
 		rs = (instWord >> 21) & 0x1f;
 		imm = (instWord & 0x0000FFFF);
-
+    imm_signed = short(imm);    //imm is always <= to 16 bits to this always works
 
 		if (opcode == 8)
 		{
-			output << "0x" << hex << pc << "\taddi\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+      output << "0x" << hex << pc << "\taddi\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm_signed << endl;
 		}
 		else if (opcode == 9)
 		{
-			output << "0x" << hex << pc << "\taddiu\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\taddiu\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm_signed << endl;
 		}
 		else if (opcode == 12)
 		{
@@ -231,36 +235,36 @@ void decode(unsigned int instWord)
 		}
 		else if (opcode == 10)
 		{
-			output << "0x" << hex << pc << "\tslti\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm << endl;
+			output << "0x" << hex << pc << "\tslti\t" << regs[rt].secname << "," << regs[rs].secname << "," << dec << imm_signed << endl;
 		}
 		else if (opcode == 15)
 		{
-			output << "0x" << hex << pc << "\tlui\t" << regs[rt].secname << "," << "0x" << imm << endl;
+			output << "0x" << hex << pc << "\tlui\t" << regs[rt].secname << "," << dec << imm_signed << endl;
 		}
 		else if (opcode == 43)
 		{
-			output << "0x" << hex << pc << "\tsw\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tsw\t" << regs[rt].secname << "," << dec << imm_signed << "(" << regs[rs].secname << ")" << endl;
 		}
 
 		else if (opcode == 35)
 		{
-			output << "0x" << hex << pc << "\tlw\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tlw\t" << regs[rt].secname << "," << dec << imm_signed << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 32)
 		{
-			output << "0x" << hex << pc << "\tlb\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tlb\t" << regs[rt].secname << "," << dec << imm_signed << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 40)
 		{
-			output << "0x" << hex << pc << "\tsb\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tsb\t" << regs[rt].secname << "," << dec << imm_signed << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 41)
 		{
-			output << "0x" << hex << pc << "\tsh\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tsh\t" << regs[rt].secname << "," << dec << imm_signed << "(" << regs[rs].secname << ")" << endl;
 		}
 		else if (opcode == 33)
 		{
-			output << "0x" << hex << pc << "\tlh\t" << regs[rt].secname << "," << dec << imm << "(" << regs[rs].secname << ")" << endl;
+			output << "0x" << hex << pc << "\tlh\t" << regs[rt].secname << "," << dec << imm_signed << "(" << regs[rs].secname << ")" << endl;
 		}
 
 	}
