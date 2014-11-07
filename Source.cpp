@@ -2,18 +2,79 @@
 #include<fstream>
 #include<bitset>
 using namespace std;
-
+struct addressname{
+	unsigned int address;
+	char name;
+};
 ofstream output;
 string out = "out.txt";
 int j = 0;
+int m = 1;
+
+addressname *label;
 
 struct reg{
 	long int num;   //Can't initialize to 0
 	string secname;
 };
 
-reg regs[32] = {0};   //initialize all members of the struct to 0, works without this?
+reg regs[32] = { 0 };   //initialize all members of the struct to 0, works without this?
 char memory[8 * 1024];
+int exist(int address)
+{
+	for (int i = 1; i <= m; i++)
+	{
+		if (address == label[i].address)
+		{
+			return i;
+		}
+	}
+
+	return 0;
+}
+void labels(unsigned int inst[], int i)		//gets the adresses that would be labeled
+{
+	unsigned int pc = 0x00400000;
+	label = new addressname[i];
+	int c = 65;
+
+
+	for (int z = 0; z < i; z++)
+	{
+		int opcode = inst[z] >> 26;
+
+		if (opcode == 2 || opcode == 3)
+		{
+			//j type
+			int address;
+			address = inst[z] & 0x03ffffff;
+			address = address << 2;
+			address = address | (pc & 0xf0000000);
+			if (exist(address) == 0)
+			{
+				label[m].name = char(c);
+				c++;
+				label[m].address = address;
+				m++;
+			}
+		}
+		else if (opcode == 4 || opcode == 5)
+		{
+
+			int imm = (inst[z] & 0x0000FFFF);
+			if (exist(pc + (imm * 4)) == 0)
+			{
+				label[m].name = char(c);
+				c++;
+				label[m].address = (pc + (imm * 4) + 4);
+				m++;
+
+			}
+		}
+		pc += 4;
+	}
+}
+
 void fillregsec()
 {
 	regs[0].secname = "$zero";
@@ -58,7 +119,12 @@ void decode(unsigned int instWord)
 	unsigned int rd, rs, rt, func, shamt, imm, opcode;
 	unsigned int address;
 	static unsigned int pc = 0x00400000;
+
 	opcode = instWord >> 26;
+	if (exist(pc))
+	{
+		output << label[exist(pc)].name << ":" << endl;
+	}
 	if (opcode == 0)
 	{
 		//R-type
@@ -114,12 +180,12 @@ void decode(unsigned int instWord)
 		address = address | (pc & 0xf0000000);
 		if (opcode == 3)
 		{
-			output << "0x" << hex << pc << "\tjal\t" << "0x" << hex << address << endl;
+			output << "0x" << hex << pc << "\tjal\t" << label[exist(address)].name << endl;
 		}
 		else if (opcode == 2)
 		{
 
-			output << "0x" << hex << pc << "\tj\t" << "0x" << hex << address << endl;
+			output << "0x" << hex << pc << "\tj\t" << label[exist(address)].name << endl;
 		}
 	}
 	else if (0 != opcode && 2 != opcode && 3 != opcode && 16 != opcode && 17 != opcode && 18 != opcode && 19 != opcode)
@@ -153,11 +219,15 @@ void decode(unsigned int instWord)
 		}
 		else if (opcode == 4)
 		{
-			output << "0x" << hex << pc << "\tbeq\t" << regs[rs].secname << "," << regs[rt].secname << "," << dec << imm << endl;
+
+			output << "0x" << hex << pc << "\tbeq\t" << regs[rs].secname << "," << regs[rt].secname << "," << label[exist(pc + 4 + (imm * 4))].name << endl;
+
 		}
 		else if (opcode == 5)
 		{
-			output << "0x" << hex << pc << "\tbne\t" << regs[rs].secname << "," << regs[rt].secname << "," << dec << imm << endl;
+
+			output << "0x" << hex << pc << "\tbne\t" << regs[rs].secname << "," << regs[rt].secname << "," << label[exist(pc + 4 + (imm * 4))].name << endl;
+
 		}
 		else if (opcode == 10)
 		{
@@ -218,58 +288,58 @@ void debug(unsigned int instWord)
 		rd = (instWord >> 11) & 0x1f;
 		rt = (instWord >> 16) & 0x1f;
 		rs = (instWord >> 21) & 0x1f;
-        
-    switch(func)
-    {
-    case 0x20:  //add
-      regs[rd].num = regs[rs].num + regs[rt].num;
-      break;
-    case 0x21:  //addu
-      regs[rd].num = regs[rs].num + regs[rt].num;
-      break;
-    case 0x22:  //sub
-      regs[rd].num = regs[rs].num - regs[rt].num;
-      break;
-    case 0x24:  //and
-      regs[rd].num = regs[rs].num & regs[rt].num;
-      break;
-    case 0x25:  //or
-      regs[rd].num = regs[rs].num | regs[rt].num;
-      break;
-    case 0x26: //xor
-      regs[rd].num = regs[rs].num ^ regs[rt].num;
-      break;
-    case 0x2a: //slt
-      regs[rd].num = (regs[rs].num < regs[rt].num);
-      break;
-    case 0x08: //jr
-      pc = regs[rs].num;
-      break;
-    case 0x02: //srl
-      regs[rd].num = regs[rs].num >> regs[rt].num;
-      break;
-    case 0x00: //sll
-      regs[rd].num = regs[rs].num << regs[rt].num;
-      break;
-    case 12:  //syscall
-      switch(regs[2].num)
-      {
-      case 1:
-        cout << regs[4].num <<endl;
-        break;
-      case 5:
-        cin >> regs[12].num;
-        break;
-      case 11:
-        cout <<char(regs[4].num) <<endl;
-        break;
-      case 12:
-        cin >> regs[4].num;
-        break;
-      }
-      break;
+
+		switch (func)
+		{
+		case 0x20:  //add
+			regs[rd].num = regs[rs].num + regs[rt].num;
+			break;
+		case 0x21:  //addu
+			regs[rd].num = regs[rs].num + regs[rt].num;
+			break;
+		case 0x22:  //sub
+			regs[rd].num = regs[rs].num - regs[rt].num;
+			break;
+		case 0x24:  //and
+			regs[rd].num = regs[rs].num & regs[rt].num;
+			break;
+		case 0x25:  //or
+			regs[rd].num = regs[rs].num | regs[rt].num;
+			break;
+		case 0x26: //xor
+			regs[rd].num = regs[rs].num ^ regs[rt].num;
+			break;
+		case 0x2a: //slt
+			regs[rd].num = (regs[rs].num < regs[rt].num) ? 1 : 0;
+			break;
+		case 0x08: //jr
+			pc = regs[rs].num;
+			break;
+		case 0x02: //srl
+			regs[rd].num = regs[rs].num >> regs[rt].num;
+			break;
+		case 0x00: //sll
+			regs[rd].num = regs[rs].num << regs[rt].num;
+			break;
+		case 12:  //syscall
+			switch (regs[2].num)
+			{
+			case 1:
+				cout << regs[4].num << endl;
+				break;
+			case 5:
+				cin >> regs[12].num;
+				break;
+			case 11:
+				cout << char(regs[4].num) << endl;
+				break;
+			case 12:
+				cin >> regs[4].num;
+				break;
+			}
+			break;
+		}
 	}
-    }
 	else if (opcode == 2 || opcode == 3)
 	{
 		//j type
@@ -283,6 +353,7 @@ void debug(unsigned int instWord)
 	else
 	{
 		//I-type
+
 		rt = (instWord >> 16) & 0x1f;
 		rs = (instWord >> 21) & 0x1f;
 		imm = (instWord & 0x0000FFFF);
@@ -417,7 +488,7 @@ void main()
 	unsigned int instruction[1024];
 	ifstream infile;
 	string in = "evenodd";
-    
+
 	fillregsec();   //Initialize secondary names
 
 	infile.open(in.c_str(), ios::out | ios::binary);
@@ -427,9 +498,16 @@ void main()
 		int i = 0;
 		output.open(out.c_str());
 
-		while (infile.read((char*)&instruction[i], 4))
+		while (infile.read((char*)&instruction[i++], 4))
 		{
-			decode(instruction[i++]);
+
+		}
+
+		labels(instruction, i);
+
+		for (int b = 0; b < i; b++)
+		{
+			decode(instruction[b]);
 		}
 		output.close();
 		for (; j < i;)
