@@ -128,7 +128,7 @@ void decode(unsigned int instWord)
 
 	unsigned int rd, rs, rt, func, imm, shamt, opcode;
 	unsigned int address;
-  int imm_signed;
+    int imm_signed;
 	static unsigned int pc = 0x00400000;
 
 	opcode = instWord >> 26;
@@ -395,22 +395,22 @@ void debug(unsigned int instWord)
 		}
 		else if (opcode == 9)
 		{//addiu
-			regs[rt].num = regs[rs].num + imm;
+			regs[rt].num = regs[rs].num + imm_signed;
 
 		}
 		else if (opcode == 12)
 		{//andi			
-			regs[rt].num = regs[rs].num & imm;
+			regs[rt].num = regs[rs].num & imm_signed;
 		}
 		else if (opcode == 13)
 		{//ori			
-			regs[rt].num = regs[rs].num | imm;
+			regs[rt].num = regs[rs].num | imm_signed;
 		}
 		else if (opcode == 14)
 		{//xori
 			if (imm & 0x8000)
 				imm = imm & 0xffff0000;
-			regs[rt].num = regs[rs].num ^ imm;
+			regs[rt].num = regs[rs].num ^ imm_signed;
 		}
 		else if (opcode == 4)
 		{//beq
@@ -434,7 +434,7 @@ void debug(unsigned int instWord)
 		else if (opcode == 15)
 		{//lui
 			imm = imm << 16;
-      regs[rt].num = 0;   //reset the target register to store upper half in
+			regs[rt].num = 0;   //reset the target register to store upper half in
 			regs[rt].num = regs[rt].num | imm;
 
 		}
