@@ -1,3 +1,6 @@
+//CS231 PROJECT 1
+//Ahmed Ewais  id
+//Shady Fanous 900131223
 #include<iostream>
 #include<fstream>
 #include<bitset>
@@ -7,7 +10,7 @@ struct addressname{
 	char name;
 };
 ofstream output;
-string out = "out.txt";
+string out = "Output.txt";
 int j = 0;
 int m = 1;
 
@@ -62,11 +65,18 @@ void labels(unsigned int inst[], int i)		//gets the adresses that would be label
 		{
 
 			int imm = (inst[z] & 0x0000FFFF);
-			if (exist(pc + (imm * 4)) == 0)
+      int imm_signed;
+
+      if (imm & 0x8000)
+        imm_signed = 0xFFFF0000 | imm;
+      else 
+        imm_signed = imm;
+
+			if (exist(pc + (imm_signed * 4)) == 0)
 			{
 				label[m].name = char(c);
 				c++;
-				label[m].address = (pc + (imm * 4) + 4);
+				label[m].address = (pc + (imm_signed * 4) + 4);
 				m++;
 
 			}
@@ -199,7 +209,11 @@ void decode(unsigned int instWord)
 		rt = (instWord >> 16) & 0x1f;
 		rs = (instWord >> 21) & 0x1f;
 		imm = (instWord & 0x0000FFFF);
-    imm_signed = short(imm);    //imm is always <= to 16 bits to this always works
+
+    if (imm & 0x8000)
+      imm_signed = 0xFFFF0000 | imm;
+    else 
+      imm_signed = imm;
 
 		if (opcode == 8)
 		{
@@ -224,13 +238,13 @@ void decode(unsigned int instWord)
 		else if (opcode == 4)
 		{
 
-			output << "0x" << hex << pc << "\tbeq\t" << regs[rs].secname << "," << regs[rt].secname << "," << label[exist(pc + 4 + (imm * 4))].name << endl;
+			output << "0x" << hex << pc << "\tbeq\t" << regs[rs].secname << "," << regs[rt].secname << "," << label[exist(pc + 4 + (imm_signed * 4))].name << endl;
 
 		}
 		else if (opcode == 5)
 		{
 
-			output << "0x" << hex << pc << "\tbne\t" << regs[rs].secname << "," << regs[rt].secname << "," << label[exist(pc + 4 + (imm * 4))].name << endl;
+			output << "0x" << hex << pc << "\tbne\t" << regs[rs].secname << "," << regs[rt].secname << "," << label[exist(pc + 4 + (imm_signed * 4))].name << endl;
 
 		}
 		else if (opcode == 10)
@@ -282,6 +296,8 @@ void debug(unsigned int instWord)
 	unsigned int rd, rs, rt, func, shamt, imm, opcode;
 	unsigned int address;
 	int eximm;
+  int imm_signed;
+  int rs_signed, rt_signed;
 	static unsigned int pc = 0x00400000;
 	opcode = instWord >> 26;
 	if (opcode == 0)
@@ -295,13 +311,17 @@ void debug(unsigned int instWord)
 
 		switch (func)
 		{
-		case 0x20:  //add
+		case 0x20://add
+      regs[rs].num = (regs[rs].num & 0x8000) ? (0xFFFF0000 | regs[rs].num): regs[rs].num;
+      regs[rt].num = (regs[rt].num & 0x8000) ? (0xFFFF0000 | regs[rt].num): regs[rt].num;
 			regs[rd].num = regs[rs].num + regs[rt].num;
 			break;
 		case 0x21:  //addu
 			regs[rd].num = regs[rs].num + regs[rt].num;
 			break;
 		case 0x22:  //sub
+      regs[rs].num = (regs[rs].num & 0x8000) ? (0xFFFF0000 | regs[rs].num): regs[rs].num;
+      regs[rt].num = (regs[rt].num & 0x8000) ? (0xFFFF0000 | regs[rt].num): regs[rt].num;
 			regs[rd].num = regs[rs].num - regs[rt].num;
 			break;
 		case 0x24:  //and
@@ -314,6 +334,8 @@ void debug(unsigned int instWord)
 			regs[rd].num = regs[rs].num ^ regs[rt].num;
 			break;
 		case 0x2a: //slt
+      regs[rs].num = (regs[rs].num & 0x8000) ? (0xFFFF0000 | regs[rs].num): regs[rs].num;
+      regs[rt].num = (regs[rt].num & 0x8000) ? (0xFFFF0000 | regs[rt].num): regs[rt].num;
 			regs[rd].num = (regs[rs].num < regs[rt].num) ? 1 : 0;
 			break;
 		case 0x08: //jr
@@ -357,23 +379,22 @@ void debug(unsigned int instWord)
 	else
 	{
 		//I-type
-
 		rt = (instWord >> 16) & 0x1f;
 		rs = (instWord >> 21) & 0x1f;
 		imm = (instWord & 0x0000FFFF);
 
+    if (imm & 0x8000)
+      imm_signed = 0xFFFF0000 | imm;
+    else 
+      imm_signed = imm;
 
 		if (opcode == 8)
 		{//addi
-			if (imm & 0x8000)
-				imm = imm & 0xffff0000;
-			regs[rt].num = regs[rs].num + imm;
+			regs[rt].num = regs[rs].num + imm_signed;
 
 		}
 		else if (opcode == 9)
 		{//addiu
-			if (imm & 0x8000)
-				imm = imm & 0xffff0000;
 			regs[rt].num = regs[rs].num + imm;
 
 		}
@@ -395,16 +416,16 @@ void debug(unsigned int instWord)
 		{//beq
 
 			if (regs[rt].num == regs[rs].num)
-				pc += imm * 4;
+				pc += imm_signed * 4;
 		}
 		else if (opcode == 5)
 		{//bne
 			if (regs[rt].num != regs[rs].num)
-				pc += imm * 4;
+				pc += imm_signed * 4;
 		}
 		else if (opcode == 10)
 		{//slti
-			if (regs[rs].num < imm)
+			if (regs[rs].num < imm_signed)
 				regs[rt].num = 1;
 			else
 				regs[rt].num = 0;
@@ -412,18 +433,15 @@ void debug(unsigned int instWord)
 		}
 		else if (opcode == 15)
 		{//lui
-
 			imm = imm << 16;
+      regs[rt].num = 0;   //reset the target register to store upper half in
 			regs[rt].num = regs[rt].num | imm;
 
 		}
 		else if (opcode == 43)
 		{//sw
-
-			imm = (imm & 0x8000) ? (0xFFFF0000 | imm) : imm;
-			imm *= 4;
-			eximm = regs[rs].num + imm - 0x10010000;
-
+			imm_signed *= 4;
+			eximm = regs[rs].num + imm_signed - 0x10010000;
 			memory[eximm++] = regs[rt].num & 0x000000ff;
 			memory[eximm++] = (regs[rt].num & 0x0000ff00) >> 8;
 			memory[eximm++] = (regs[rt].num & 0x00ff0000) >> 16;
@@ -433,9 +451,7 @@ void debug(unsigned int instWord)
 		else if (opcode == 35)
 		{//lw
 
-			address = regs[rs].num + imm * 4;
-			if (imm & 0x8000)
-				imm = imm & 0xffff0000;
+			address = regs[rs].num + imm_signed * 4;
 			regs[rt].num = 0;
 			regs[rt].num |= memory[address++ - 0x10010000];
 			regs[rt].num |= (memory[address++ - 0x10010000] << 8);
@@ -447,26 +463,20 @@ void debug(unsigned int instWord)
 		}
 		else if (opcode == 32)
 		{//lb
-			if (imm & 0x8000)
-				imm = imm | 0xffff0000;
-			address = regs[rs].num + imm;
+			address = regs[rs].num + imm_signed;
 			regs[rt].num = memory[address - 0x10010000];
 
 		}
 		else if (opcode == 40)
 		{//sb
-			if (imm & 0x8000)
-				imm = imm & 0xffff0000;
-			address = regs[rs].num + imm;
+			address = regs[rs].num + imm_signed;
 			memory[address - 0x10010000] = regs[rt].num & 0x000000ff;
 
 		}
 		else if (opcode == 41)
 		{//sh
 
-			address = regs[rs].num + imm * 2;
-			if (imm & 0x8000)
-				imm = imm & 0xffff0000;
+			address = regs[rs].num + imm_signed * 2;
 			memory[address++ - 0x10010000] = regs[rt].num & 0x000000ff;
 			memory[address - 0x10010000] = (regs[rt].num & 0x0000ff00) >> 8;
 
@@ -474,10 +484,7 @@ void debug(unsigned int instWord)
 		else if (opcode == 33)
 		{//lh
 
-			address = regs[rs].num + imm * 2;
-			if (imm & 0x8000)
-				imm = imm & 0xffff0000;
-			regs[rt].num = 0;
+			address = regs[rs].num + imm_signed * 2;
 			regs[rt].num |= memory[address++ - 0x10010000];
 			regs[rt].num |= (memory[address - 0x10010000] << 8);
 
@@ -489,14 +496,26 @@ void debug(unsigned int instWord)
 }
 void main()
 {
+  char prompt;
 	unsigned int instruction[1024];
 	ifstream infile;
-	string in = "evenodd";
+	string in;
 
-	fillregsec();   //Initialize secondary names
+  cout<<"===============================================================================\n";
+  cout<<"\t\t\tMIPS Dissassembler and Simulator\n";
+  cout<<"===============================================================================\n";
+  cout<<"Enter the name of your binary file (include .bin extension at the end)\n> ";
+  cin>>in;
 
 	infile.open(in.c_str(), ios::out | ios::binary);
+  while(!infile.good())
+  {
+    cout<<"File does not exist, enter your file name again.\n> ";
+    cin>>in;
+    infile.open(in.c_str(), ios::out | ios::binary);
+  }
 
+  fillregsec();   //Initialize secondary names
 	if (infile.is_open())
 	{
 		int i = 0;
@@ -514,10 +533,17 @@ void main()
 			decode(instruction[b]);
 		}
 		output.close();
-		for (; j < i;)
-		{
-			debug(instruction[j]);
-		}
+    cout<<"\nDone! Dissasembled code is now in Output.txt\n";
+    cout<<"Would you like to execute your code?(y/n)\n> ";
+    cin>>prompt;
+    if (prompt == 'y')
+    {
+      cout<<"\nAny syscall prints are below: \n";
+		  for (; j < i;)
+		  {
+			  debug(instruction[j]);
+		  }
+    }
 	}
 
 	infile.close();
