@@ -1,14 +1,17 @@
 //CS231 PROJECT 1
-//Ahmed Ewais  id
+//Ahmed Ewais  900132986
 //Shady Fanous 900131223
 #include<iostream>
 #include<fstream>
 #include<bitset>
+
 using namespace std;
+
 struct addressname{
 	unsigned int address;
 	char name;
 };
+
 ofstream output;
 string out = "Output.txt";
 int j = 0;
@@ -23,6 +26,7 @@ struct reg{
 
 reg regs[32] = { 0 };   //initialize all members of the struct to 0, works without this?
 char memory[8 * 1024];
+
 int exist(int address)
 {
 	for (int i = 1; i <= m; i++)
@@ -297,7 +301,7 @@ void debug(unsigned int instWord)
 	unsigned int address;
 	int eximm;
   int imm_signed;
-  int rs_signed, rt_signed;
+
 	static unsigned int pc = 0x00400000;
 	opcode = instWord >> 26;
 	if (opcode == 0)
